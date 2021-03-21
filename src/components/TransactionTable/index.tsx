@@ -1,12 +1,21 @@
-import { useEffect } from 'react';
-import { api } from '../../services/api';
+import { useTransactions } from '../../hooks/useTransactions';
 import { Container } from './styles'
 
+
+
 export function TransactionTable () {
-    useEffect(() => {
-        api.get('transactions')
-            .then(response => console.log(response.data))
-    }, [])
+    const { transactions } = useTransactions()
+
+    const getAmountLabel = (type: string, amount: number) => {
+        return `${type === 'withdraw' ? '-' : ''}${new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(amount)}`
+    }
+
+    const getDateLabel = (date: string) =>  {
+        return new Intl.DateTimeFormat('pt-BR').format(new Date(date))
+    }
 
     return (
         <Container>
@@ -21,18 +30,14 @@ export function TransactionTable () {
                 </thead>
 
                 <tbody>
-                    <tr>
-                        <td>Desenvolvimento de website</td>
-                        <td className="deposit">R$12.000</td>
-                        <td>Desenvolvimento</td>
-                        <td>20/02/2021</td>
-                    </tr>
-                    <tr>
-                        <td>Aluguel</td>
-                        <td className="withdraw"> - R$1.100</td>
-                        <td>Casa</td>
-                        <td>17/02/2021</td>
-                    </tr>
+                    {transactions.map(({ id, title, type,amount, category, createdAt }) => (
+                        <tr key={id}>
+                            <td>{title}</td>
+                            <td className={type}>{getAmountLabel(type, amount)}</td>
+                            <td>{category}</td>
+                            <td>{getDateLabel(createdAt)}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </Container>
